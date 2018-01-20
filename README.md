@@ -28,25 +28,33 @@ Each message from the client and the server is sent as a dictionary that is ‘p
 _Note: the clients reads the data from ‘SampleTextFile_xkb.txt’ and the server stores the data in ‘my_file_server.txt’.
 Here xkb refers to the file_size done in experiment. The text files were taken from http://www.sample-videos.com/download-sample-text-file.php_
 
-### The `SESSION_BEING`: starting of a session of file transfer
+### The `SESSION_BEGIN`: starting of a session of file transfer
 The client initiates a file transfer session to the server. On the client side this is what the TCP payload i.e. mesage looks like when a client wishes to initiate a file transfer session:
 `{'data': 'T', 'file_size': 15, 'message_type': 0, 'chunk_size': 1, 'times': 1}`
 `data:` Here data refers to the physical chunk that is being sent to the server.
 `file_size:` this refers to the total file_size that is being sent over this session. This file_size is redundantly sent in all the messages from the client to the server, not just in the initiating messages. If this is inconsistent for one complete session, the server will return an error and the file transfer will have to start again. We will discuss how the server responds with such an error.
 `message_type`: refers to the type of the message that is being sent from the client to the server. In reply to every message_type the server just adds the same message_type that it has received from the client. There are three kinds of message_types in our implementation.
+
     0: refers to the beginning of the session. It is referred to as SESSION_BEGIN in our implementation.
     1: refers to the progress of the session. It is referred to as SESSION_IN_PROGRESS in our implementation. This means that once this message is sent, the client assumes that the SESSION_BEGIN message has already been sent to the server and acknowledged by the server.
     2: refers to the end of the session. It is referred to as SESSION_END in our implementation. This means that all the data has been successfully transferred and the client is signalling to the server that for one file time, check whether or not the correct file has been transferred. This is the only message from the client to which the server replies with ACK_FILE message back which means that the whole file has been transferred successfully and now the whole server and the client can successfully terminate.
+    
 _Note: for simplicity we have determined that the server and the client receive and transfer only one file and then terminate. The multi-threading and scalability approach has therefore not been implemented._
+
 `chunk_size`: is the size of the chunk that is transferred with one single message. Just like file size if this is inconsistent throughout the transfer process, the server will return an error and the transfer will start all over again.
+
 `times`: is the size of the chunk that is transferred with one single message. Just like file size if this is inconsistent throughout the transfer process, the server will return an error and the transfer will start all over again. With every acknowledgement the client and the server increment their times variable which means that the next chunk is to be read and transferred from the file.
+
 _Note: the first chunk is transferred with the SESSION_BEGIN message and not after it._
 
 To the SESSION_BEGIN message from the client the server responds as such:
 `{'chunk_ack': 1, 'message_type': 0, 'file_ack': 4, 'file_size': 15}`
 `chunk_ack` or 1: is the acknowledge of this chunk that the client has sent. A 0 value would mean a chunk_nack which means that the chunk would have to be sent again from the client. The chunk_nack would suggest that the client should not read another chunk from the file and the times variable on the client should not be incremented.
+
 `message_type`: is the same as the message_type sent from the client to which this server’s message is a reply to. This is just to indicate to the client that to which type of message is this message a reply to.
+
 `file_ack`: is the message which tells the client whether or not this particular chunk has been acked or not, the whole file has not yet been transferred and the server expects further chunks until the file is transferred.
+
 `file_size`: is a redundant reply to the client just to make the client know that the server is expecting a total file_size of 15 bytes in this session.
 
 ### The SESSION_IN_PROGRESS: transferring the chunks
@@ -69,6 +77,7 @@ This is a sample response.
 You can see here that message_type message is changed to 1 rather than 0.
 The `SESSION_END` message: signalling the end of transfer
 The last type of message that the client sends to the server is the `SESSION_END` message which is sent to the server is upon completion a file transfer. The client sends message_type to be 2 which means that this is an end of a file transfer and that the client is receiving the final acknowledgement of the complete file transfer from the server with `file_ack` to be finally 3 which means that the complete file is transferred.
+
 Here is a sample request and a response from the server regarding the completed file transfer.
 Client request:  `{'data': '', 'file_size': 15, 'message_type': 2, 'chunk_size': 1, 'times': 16}`
 Server response: `{'message_type': 2, 'file_ack': 3, 'file_size': 15}`
