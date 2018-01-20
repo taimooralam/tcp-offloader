@@ -56,6 +56,7 @@ while 1:
                 f= open(FILENAME,"w+")
                 f.write(u_data["data"])
                 TIMES = TIMES + 1
+		print 'Session begins, wrote data of size{0} and acked chunk'.format(CHUNK_SIZE)
         elif(u_data['message_type'] == SESSION_IN_PROGRESS):
             if u_data['file_size']<u_data['chunk_size'] or u_data['file_size']!=FILE_SIZE or u_data['chunk_size']!=CHUNK_SIZE or u_data['times']!=TIMES:
                 u_data["chunk_ack"] = NACK_CHUNK
@@ -65,6 +66,7 @@ while 1:
                 u_data["file_ack"] = NACK_FILE
                 TIMES = TIMES + 1
                 f.write(u_data["data"]);
+                print 'Received and wrote data of size{0} and acked chunk'.format(CHUNK_SIZE)
         elif(u_data['message_type'] == SESSION_COMPLETE):
             if u_data['file_size']<u_data['chunk_size'] or u_data['file_size']!=FILE_SIZE or u_data['chunk_size']!=CHUNK_SIZE or u_data['times']!=TIMES:
                 u_data["chunk_ack"] = NACK_CHUNK
@@ -76,6 +78,7 @@ while 1:
                     u_data["file_ack"] = NACK_FILE
                 else:
                     u_data["file_ack"] = ACK_FILE
+		    print 'Session complete, wrote file of size {0} bytes with the name {1}'.format(FILE_SIZE, FILENAME)
                     
         else:
             u_data["chunk_ack"] = NACK_CHUNK
@@ -85,7 +88,8 @@ while 1:
         del u_data['chunk_size']
         del u_data['data']
     except EOFError:
-        print "Ignore this error"
+        a = 1
+        #print "Ignore this error, it does come in unpickling, but does not affect the logic of the program"
     #print 'Received'
     if not data: break
     conn.sendall(pickle.dumps(u_data))
