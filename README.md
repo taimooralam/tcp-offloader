@@ -13,7 +13,7 @@ _A TCP client-server program that sends a file over intermittent mobile connecti
 9. To changed the `file_size`, `chunk_size` and `timeout open client.py` and change the corresponding values.
 
 Otherwise
-1. Run sudo python server.py and sudo python client.py in two different terminals to see the file transfer.
+1. Run `sudo python server.py` and `sudo python client.py` in two different terminals to see the file transfer.
 
 ## Design Description
 The protocol requires us to develop an application such that the file transfer happens between the server h1 and the client sta1 such that in loss of connection the file transfer does not cancel out, but start from the point where it is stopped when the connectivity was lost. (The h1 will referred to as the server in this document and the sta1 will be referred to as the client.)
