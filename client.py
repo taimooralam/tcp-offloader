@@ -81,7 +81,7 @@ with open(FILENAME) as f:
                 got = s.recv(1024)
                 print 'Received', repr(pickle.loads(got))
                 end = time.time()
-                print "File of size {0} bytes correctly transferred in {1} milliseconds.".format(FILE_SIZE,end-start)
+                print "File of size {0} bytes correctly transferred in {1} seconds.".format(FILE_SIZE,end-start)
                 break
             except socket.timeout:
                 print "Oops: timeout trying receiving again"
